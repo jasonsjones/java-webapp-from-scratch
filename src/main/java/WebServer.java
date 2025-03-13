@@ -28,14 +28,7 @@ public class WebServer {
     private static void handleRequest(Socket clientSocket) throws IOException {
         echoRequest(clientSocket);
 
-        String httpResponse = "HTTP/1.1 200 OK\r\n"
-                + "Content-Type: text/html; charset=UTF-8\r\n"
-                + "Connection: close\r\n\r\n"
-                + "<!DOCTYPE html>"
-                + "<html lang=\"en\">"
-                + "<head><title>Simple HTTP Server</title></head>"
-                + "<body><h1>Hello, World!</h1></body>"
-                + "</html>";
+        String httpResponse = printResponseHeader("text/html", "UTF-8") + printResponseContent();
  
         OutputStream outputStream = clientSocket.getOutputStream();
         outputStream.write(httpResponse.getBytes());
@@ -51,5 +44,23 @@ public class WebServer {
             requestData.append(line).append("\r\n");
         }
         System.out.println("Received request:\n" + requestData);
+    }
+
+    private static String printResponseHeader(String mimeType, String charset) {
+        String header = "HTTP/1.1 200 OK\r\n"
+                + "Content-Type: " + mimeType + "; charset=" + charset + "\r\n"
+                + "Connection: close\r\n\r\n";
+
+        return header;
+    }
+
+    private static String printResponseContent() {
+        String httpResponseContent = "<!DOCTYPE html>"
+                + "<html lang=\"en\">"
+                + "<head><title>Simple HTTP Server</title></head>"
+                + "<body><h1>Hello, World!</h1></body>"
+                + "</html>";
+
+        return httpResponseContent;
     }
 }
