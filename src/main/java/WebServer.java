@@ -12,11 +12,11 @@ public class WebServer {
 
     public static void main(String[] args) {
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("Web server is running on port " + PORT);
+            System.out.println("\nWeb server is running on port " + PORT);
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("New connection from: " + clientSocket.getInetAddress() + "\n");
+                System.out.println("\nNew connection from: " + clientSocket.getInetAddress() + "\n");
                 handleRequest(clientSocket);
             }
         } catch (IOException e) {
