@@ -12,20 +12,28 @@ import com.jasonsjones.app.config.ConfigurationManager;
 
 public class App {
 
+    private static final String CRLF = "/r/n";
+
     public static void main(String[] args) {
         Configuration config = ConfigurationManager.getInstance().getCurrentConfiguration();
 
+        Socket clientSocket = null;
         try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
             System.out.println("\nWeb server is running on port " + config.getPort());
 
-            while (true) {
-                Socket clientSocket = serverSocket.accept();
-                System.out.println("\nNew connection from: " + clientSocket.getInetAddress() + "\n");
-                handleRequest(clientSocket);
-                clientSocket.close();
-            }
+            clientSocket = serverSocket.accept();
+            System.out.println("\nNew connection from: " + clientSocket.getInetAddress() + "\n");
+            handleRequest(clientSocket);
         } catch (IOException e) {
             System.err.println("Could not start server" + e.getMessage());
+        } finally {
+            try {
+                if (clientSocket != null) {
+                    clientSocket.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -50,9 +58,10 @@ public class App {
     }
 
     private static String generateResponseHeader(String mimeType, String charset) {
-        String header = "HTTP/1.1 200 OK\r\n"
-                + "Content-Type: " + mimeType + "; charset=" + charset + "\r\n"
-                + "Connection: close\r\n\r\n";
+        String header = "HTTP/1.1 200 OK" + CRLF 
+                + "Content-Type: " + mimeType + "; charset=" + charset + CRLF
+                + "Connection: close" + CRLF
+                + CRLF;
 
         return header;
     }
@@ -63,7 +72,7 @@ public class App {
                 + "<head><title>Simple HTTP Server</title></head>"
                 + "<body><h1>Hello, World!</h1></body>"
                 + "</html>"
-                + "\r\n";
+                + CRLF;
 
         return httpResponseContent;
     }
