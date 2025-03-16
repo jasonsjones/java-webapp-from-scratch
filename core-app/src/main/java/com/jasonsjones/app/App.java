@@ -7,12 +7,16 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+import com.jasonsjones.app.config.Configuration;
+import com.jasonsjones.app.config.ConfigurationManager;
+
 public class App {
-    private static final int PORT = 8080;
 
     public static void main(String[] args) {
-        try (ServerSocket serverSocket = new ServerSocket(PORT)) {
-            System.out.println("\nWeb server is running on port " + PORT);
+        Configuration config = ConfigurationManager.getInstance().getCurrentConfiguration();
+
+        try (ServerSocket serverSocket = new ServerSocket(config.getPort())) {
+            System.out.println("\nWeb server is running on port " + config.getPort());
 
             while (true) {
                 Socket clientSocket = serverSocket.accept();
