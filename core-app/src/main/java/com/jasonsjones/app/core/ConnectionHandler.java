@@ -8,7 +8,7 @@ import java.net.Socket;
 
 public class ConnectionHandler extends Thread {
 
-    private static final String CRLF = "/r/n";
+    private static final String CRLF = "\r\n";
     private Socket socket;
 
     public ConnectionHandler(Socket socket) {
@@ -40,6 +40,7 @@ public class ConnectionHandler extends Thread {
         echoRequest(clientSocket);
 
         String httpResponse = generateResponseHeader("text/html", "UTF-8") + generateResponseContent();
+        System.out.println("Sending response:\n" + httpResponse);
  
         OutputStream outputStream = clientSocket.getOutputStream();
         outputStream.write(httpResponse.getBytes());
@@ -51,7 +52,7 @@ public class ConnectionHandler extends Thread {
         String line;
         StringBuilder requestData = new StringBuilder();
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
-            requestData.append(line).append("\r\n");
+            requestData.append(line).append(CRLF);
         }
         System.out.println("Received request:\n" + requestData);
     }
