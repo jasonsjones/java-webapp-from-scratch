@@ -9,12 +9,12 @@ import java.net.Socket;
 
 import com.jasonsjones.app.config.Configuration;
 
-public class ServerListenerThread extends Thread {
+public class SocketListener extends Thread {
 
     private static final String CRLF = "/r/n";
     private int port;
         
-    public ServerListenerThread(Configuration config) {
+    public SocketListener(Configuration config) {
         this.port = config.getPort();
     }
 
