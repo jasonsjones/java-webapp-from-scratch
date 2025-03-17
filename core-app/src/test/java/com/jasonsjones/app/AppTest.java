@@ -3,6 +3,7 @@ package com.jasonsjones.app;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -58,10 +59,10 @@ public class AppTest {
                 App.main(new String[]{});
 
                 // Verify that getCurrentConfiguration was called
-                verify(configurationManager).getCurrentConfiguration();
+                verify(configurationManager, times(1)).getCurrentConfiguration();
 
                 // Verify that start was called on the socket listener
-                verify(mockedSocketListener.constructed().get(0)).start();
+                verify(mockedSocketListener.constructed().get(0), times(1)).start();
             }
         }
     }
