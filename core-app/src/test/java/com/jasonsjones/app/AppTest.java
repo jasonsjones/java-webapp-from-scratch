@@ -1,19 +1,23 @@
 package com.jasonsjones.app;
 
-import com.jasonsjones.app.config.Configuration;
-import com.jasonsjones.app.config.ConfigurationManager;
-import com.jasonsjones.app.core.SocketListener;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
-import static org.mockito.Mockito.*;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.BeforeEach;
+import com.jasonsjones.app.config.Configuration;
+import com.jasonsjones.app.config.ConfigurationManager;
+import com.jasonsjones.app.core.SocketListener;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AppTest {
