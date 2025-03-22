@@ -6,8 +6,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class ConnectionHandler extends Thread {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
     private static final String CRLF = "\r\n";
     private Socket socket;
 
@@ -19,7 +23,7 @@ public class ConnectionHandler extends Thread {
     @Override
     public void run() {
         super.run();
-        System.out.println("\nNew connection from: " + this.socket.getInetAddress() + "\n");
+        LOGGER.info("New connection from: " + this.socket.getInetAddress() + "\n");
         try {
             handleRequest(socket);
         } catch (IOException e) {
@@ -32,7 +36,7 @@ public class ConnectionHandler extends Thread {
                     e.printStackTrace();
                 }
             }
-            System.out.println("Connection closed");
+            LOGGER.info("Connection closed");
         }
     }
 
@@ -40,7 +44,7 @@ public class ConnectionHandler extends Thread {
         echoRequest(clientSocket);
 
         String httpResponse = generateResponseHeader("text/html", "UTF-8") + generateResponseContent();
-        System.out.println("Sending response:\n" + httpResponse);
+        LOGGER.info("Sending response:\n" + httpResponse);
  
         OutputStream outputStream = clientSocket.getOutputStream();
         outputStream.write(httpResponse.getBytes());
@@ -54,7 +58,7 @@ public class ConnectionHandler extends Thread {
         while ((line = reader.readLine()) != null && !line.isEmpty()) {
             requestData.append(line).append(CRLF);
         }
-        System.out.println("Received request:\n" + requestData);
+        LOGGER.info("Received request:\n" + requestData);
     }
 
     private static String generateResponseHeader(String mimeType, String charset) {
