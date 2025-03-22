@@ -38,6 +38,7 @@ public class HttpParser {
         if (uriParts.length > 1) {
             request.getUri().setQueryParams(parseQueryString(uriParts[1]));
         }
+        request.setVersion(requestParts[2]);
 
         return request;
     }
@@ -50,7 +51,7 @@ public class HttpParser {
             String[] queryParamParts = rawQueryParam.split("=");
             if (queryParamParts.length == 2) {
                 String key = URLDecoder.decode(queryParamParts[0], StandardCharsets.UTF_8);
-                String value = queryParamParts.length > 1 ? URLDecoder.decode(queryParamParts[1], StandardCharsets.UTF_8) : "";
+                String value = URLDecoder.decode(queryParamParts[1], StandardCharsets.UTF_8);
                 queryMap.put(key, value);
             } else {
                 throw new HttpParsingException("Query parameter must have 2 parts");

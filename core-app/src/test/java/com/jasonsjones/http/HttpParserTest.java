@@ -53,6 +53,17 @@ public class HttpParserTest {
     }
 
     @Test
+    void parseHttpRequestNullMethodFromNonGetMethods() throws IOException, HttpParsingException {
+        String requestString = "POST / HTTP/1.1";
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
+
+        assertNotNull(httpRequest);
+        assertNull(httpRequest.getMethod());
+    }
+
+    @Test
     void parseHttpRequestUriFromValidRequestLine() throws IOException, HttpParsingException {
         String requestString = "GET /home HTTP/1.1";
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
@@ -85,6 +96,28 @@ public class HttpParserTest {
         assertThrows(HttpParsingException.class, () -> {
             httpParser.parseHttpRequest(inputStream);
         });
+    }
+
+    @Test
+    void parseHttpRequestVersionFromValidRequestLine() throws IOException, HttpParsingException {
+        String requestString = "GET / HTTP/1.1";
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
+
+        assertNotNull(httpRequest);
+        assertEquals(HttpVersion.HTTP_1_1, httpRequest.getVersion());
+    }
+
+    @Test
+    void parseHttpRequestNullVersionFromUnknowVersion() throws IOException, HttpParsingException {
+        String requestString = "GET / HTTP/1.2";
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
+
+        assertNotNull(httpRequest);
+        assertNull(httpRequest.getVersion());
     }
     
     
