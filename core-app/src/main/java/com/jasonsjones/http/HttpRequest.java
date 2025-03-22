@@ -1,10 +1,13 @@
 package com.jasonsjones.http;
 
+import java.util.Map;
+
 public class HttpRequest extends HttpMessage{
 
     private HttpMethod method;
     private HttpUri uri;
     private HttpVersion version;
+    private Map<String, String> headers;
 
     HttpRequest() {
         this.uri = new HttpUri();
@@ -32,5 +35,13 @@ public class HttpRequest extends HttpMessage{
         if (version.equals(HttpVersion.HTTP_1_1.LITERAL)) {
             this.version = HttpVersion.HTTP_1_1;
         }
+    }
+
+    public Map<String, String> getHeaders() {
+        return headers;
+    }
+
+    public void setHeaders(Map<String, String> headers) {
+        this.headers = headers;
     }
 }

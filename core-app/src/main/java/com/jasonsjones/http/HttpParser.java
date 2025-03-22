@@ -29,7 +29,7 @@ public class HttpParser {
             throw new HttpParsingException("Request line must have 3 parts");
         }
 
-        LOGGER.info(requestLine);
+        LOGGER.info("Request line: {}", requestLine);
         request.setMethod(requestParts[0]);
 
         String uri = requestParts[1];
@@ -39,6 +39,20 @@ public class HttpParser {
             request.getUri().setQueryParams(parseQueryString(uriParts[1]));
         }
         request.setVersion(requestParts[2]);
+
+        String headerLine;
+        Map<String, String> headers = new HashMap<>();
+        while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
+            String[] headerParts = headerLine.split(":", 2);
+            if (headerParts.length == 2) {
+                String key = headerParts[0].trim();
+                String value = headerParts[1].trim();
+                headers.put(key, value);
+            } else {
+                throw new HttpParsingException("Header must have 2 parts");
+            }
+        }
+        request.setHeaders(headers);
 
         return request;
     }

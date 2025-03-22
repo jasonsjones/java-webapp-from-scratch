@@ -14,6 +14,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class HttpParserTest {
+    private static final String CRLF = "\r\n";
+    
     private HttpParser httpParser;
 
     @BeforeEach
@@ -33,7 +35,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestThrowsExceptionForInvalidRequestLine() throws IOException, HttpParsingException {
-        String requestString = "GET /";
+        String requestString = "GET /" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         assertThrows(HttpParsingException.class, () -> {
@@ -43,7 +45,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestGetMethodFromValidRequestLine() throws IOException, HttpParsingException {
-        String requestString = "GET / HTTP/1.1";
+        String requestString = "GET / HTTP/1.1" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
@@ -54,7 +56,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestNullMethodFromNonGetMethods() throws IOException, HttpParsingException {
-        String requestString = "POST / HTTP/1.1";
+        String requestString = "POST / HTTP/1.1" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
@@ -65,7 +67,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestUriFromValidRequestLine() throws IOException, HttpParsingException {
-        String requestString = "GET /home HTTP/1.1";
+        String requestString = "GET /home HTTP/1.1" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
@@ -77,7 +79,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestUriQueryParamsFromValidRequestLine() throws IOException, HttpParsingException {
-        String requestString = "GET /home?param1=value1&param2=value2 HTTP/1.1";
+        String requestString = "GET /home?param1=value1&param2=value2 HTTP/1.1" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
@@ -90,7 +92,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestThrowsWhenQueryParamsAreInvalid() throws IOException, HttpParsingException {
-        String requestString = "GET /home?param1=value1&param2 HTTP/1.1";
+        String requestString = "GET /home?param1=value1&param2 HTTP/1.1" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         assertThrows(HttpParsingException.class, () -> {
@@ -100,7 +102,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestVersionFromValidRequestLine() throws IOException, HttpParsingException {
-        String requestString = "GET / HTTP/1.1";
+        String requestString = "GET / HTTP/1.1" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
@@ -111,7 +113,7 @@ public class HttpParserTest {
 
     @Test
     void parseHttpRequestNullVersionFromUnknowVersion() throws IOException, HttpParsingException {
-        String requestString = "GET / HTTP/1.2";
+        String requestString = "GET / HTTP/1.2" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
@@ -119,6 +121,36 @@ public class HttpParserTest {
         assertNotNull(httpRequest);
         assertNull(httpRequest.getVersion());
     }
-    
+
+    @Test
+    void parseHttpResponseAddRequestHeadersFromValidRequest() throws IOException, HttpParsingException {
+        String requestString = "GET /home HTTP/1.1" + CRLF +
+                               "Host: 127.0.0.1:8080" + CRLF +
+                               "User-Agent: Mozilla/5.0" + CRLF +
+                               CRLF;
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
+
+        assertNotNull(httpRequest);
+        assertEquals("/home", httpRequest.getUri().getPath());
+        assertNull(httpRequest.getUri().getQueryParams());
+        assertEquals(2, httpRequest.getHeaders().size());
+        assertEquals("127.0.0.1:8080", httpRequest.getHeaders().get("Host"));
+        assertEquals("Mozilla/5.0", httpRequest.getHeaders().get("User-Agent"));
+    }
+
+    @Test
+    void parseHttpResponseThrowsWhenHeaderIsInvalid() throws IOException, HttpParsingException {
+        String requestString = "GET /home HTTP/1.1" + CRLF +
+                               "Host: 127.0.0.1:8080" + CRLF +
+                               "User-Agent" + CRLF +
+                               CRLF;
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        assertThrows(HttpParsingException.class, () -> {
+            httpParser.parseHttpRequest(inputStream);
+        });
+    }
     
 }
