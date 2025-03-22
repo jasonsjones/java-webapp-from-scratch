@@ -2,6 +2,7 @@ package com.jasonsjones.http;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.io.ByteArrayInputStream;
@@ -21,6 +22,16 @@ public class HttpParserTest {
     }
 
     @Test
+    void parseHttpRequestThrowsExceptionForEmptyRequestLine() throws IOException, HttpParsingException {
+        String requestString = "";
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        assertThrows(HttpParsingException.class, () -> {
+            httpParser.parseHttpRequest(inputStream);
+        });
+    }
+
+    @Test
     void parseHttpRequestThrowsExceptionForInvalidRequestLine() throws IOException, HttpParsingException {
         String requestString = "GET /";
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
@@ -31,7 +42,7 @@ public class HttpParserTest {
     }
 
     @Test
-    void parseHttpGetMethodFromValidRequestLine() throws IOException, HttpParsingException {
+    void parseHttpRequestGetMethodFromValidRequestLine() throws IOException, HttpParsingException {
         String requestString = "GET / HTTP/1.1";
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
@@ -40,5 +51,41 @@ public class HttpParserTest {
         assertNotNull(httpRequest);
         assertEquals(HttpMethod.GET, httpRequest.getMethod());
     }
+
+    @Test
+    void parseHttpRequestUriFromValidRequestLine() throws IOException, HttpParsingException {
+        String requestString = "GET /home HTTP/1.1";
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
+
+        assertNotNull(httpRequest);
+        assertEquals("/home", httpRequest.getUri().getPath());
+        assertNull(httpRequest.getUri().getQueryParams());
+    }
+
+    @Test
+    void parseHttpRequestUriQueryParamsFromValidRequestLine() throws IOException, HttpParsingException {
+        String requestString = "GET /home?param1=value1&param2=value2 HTTP/1.1";
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
+
+        assertNotNull(httpRequest);
+        assertEquals("/home", httpRequest.getUri().getPath());
+        assertEquals(2, httpRequest.getUri().getQueryParams().size());
+        assertEquals("value1", httpRequest.getUri().getQueryParams().get("param1"));
+    }
+
+    @Test
+    void parseHttpRequestThrowsWhenQueryParamsAreInvalid() throws IOException, HttpParsingException {
+        String requestString = "GET /home?param1=value1&param2 HTTP/1.1";
+        InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
+
+        assertThrows(HttpParsingException.class, () -> {
+            httpParser.parseHttpRequest(inputStream);
+        });
+    }
+    
     
 }
