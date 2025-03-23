@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,12 +19,10 @@ public class ConnectionHandler extends Thread {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
     private Socket socket;
     private HttpParser httpParser = new HttpParser();
-    
 
     public ConnectionHandler(Socket socket) {
         this.socket = socket;
     }
-
 
     @Override
     public void run() {
@@ -64,34 +61,52 @@ public class ConnectionHandler extends Thread {
     }
 
     private HttpResponse handleGetRequest(HttpRequest request) {
-        HttpResponse.Builder builder = new HttpResponse.Builder()
-            .withVersion(HttpVersion.HTTP_1_1)
-            .withStatusCode(HttpStatusCode.OK)
-            .withHeader("Content-Type", "text/html; charset= UTF-8")
-            .withHeader("Connection", "close")
-            .withBody(generateResponseContent("Hello java world!").getBytes());
-            return builder.build();
+        try {
+            String htmlContent = loadTemplateFile("templates/response.html", "Hello Java World!");
+            HttpResponse.Builder builder = new HttpResponse.Builder()
+                .withVersion(HttpVersion.HTTP_1_1)
+                .withStatusCode(HttpStatusCode.OK)
+                .withHeader("Content-Type", "text/html; charset= UTF-8")
+                .withHeader("Connection", "close")
+                .withBody(htmlContent.getBytes());
+                return builder.build();
+        } catch (IOException e) {
+            LOGGER.error("Error loading HTML file", e);
+            return handleInternalServerError();
+        }
     }
 
     private HttpResponse handleNotImplemented(HttpRequest request) {
+        try {
+            String htmlContent = loadTemplateFile("templates/notImplemented.html", "Server Error: Not Implemented`");
+            HttpResponse.Builder builder = new HttpResponse.Builder()
+                .withVersion(HttpVersion.HTTP_1_1)
+                .withStatusCode(HttpStatusCode.NOT_IMPLEMENTED)
+                .withHeader("Content-Type", "text/html; charset= UTF-8")
+                .withHeader("Connection", "close")
+                .withBody(htmlContent.getBytes());
+                return builder.build();
+        } catch (IOException e) {
+            LOGGER.error("Error loading HTML file", e);
+            return handleInternalServerError();
+        }
+            
+    }
+
+    private HttpResponse handleInternalServerError() {
         HttpResponse.Builder builder = new HttpResponse.Builder()
-            .withVersion(HttpVersion.HTTP_1_1)
-            .withStatusCode(HttpStatusCode.NOT_IMPLEMENTED)
-            .withHeader("Content-Type", "text/html; charset= UTF-8")
-            .withHeader("Connection", "close")
-            .withBody(generateResponseContent("Server Error: Not Implemented").getBytes());
-            return builder.build();
+                .withVersion(HttpVersion.HTTP_1_1)
+                .withStatusCode(HttpStatusCode.INTERNAL_ERROR)
+                .withHeader("Content-Type", "text/html; charset= UTF-8")
+                .withHeader("Connection", "close")
+                .withBody("<h1>Internal Server Error</h1>".getBytes());
+        return builder.build();
     }
 
-    private String generateResponseContent(String title) {
-        String httpResponseContent = "<!DOCTYPE html>\n"
-                + "<html lang=\"en\">\n"
-                + "<head><title>Simple HTTP Server</title></head>\n"
-                + "<body><h1>" + title + "</h1></body>\n"
-                + "</html>\n";
-
-        return httpResponseContent;
+    private String loadTemplateFile(String templateFile, String heading) throws IOException {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        InputStream inputStream = classLoader.getResourceAsStream(templateFile);
+        String htmlContent = new String(inputStream.readAllBytes());
+        return htmlContent.replace("{{heading}}", heading);
     }
-
-    
 }
