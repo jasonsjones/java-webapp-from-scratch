@@ -72,7 +72,7 @@ public class ConnectionHandler extends Thread {
 
     private HttpResponse generateResponse(String templateFile, HttpStatusCode statusCode, String heading) throws RuntimeException {
         try {
-            String htmlContent = loadTemplateFile(templateFile, heading);
+            String htmlContent = TemplateLoader.loadTemplate(templateFile, heading);
             return generateResponse(statusCode, htmlContent.getBytes());
         } catch (IOException e) {
             LOGGER.error("Error loading HTML template file", e);
@@ -88,15 +88,5 @@ public class ConnectionHandler extends Thread {
             .withHeader(HttpHeader.CONNECTION.getName(), "close")
             .withBody(body);
             return builder.build();
-    }
-
-    private String loadTemplateFile(String templateFile, String heading) throws IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        InputStream inputStream = classLoader.getResourceAsStream(templateFile);
-        if (inputStream == null) {
-            throw new IOException("Template file not found: " + templateFile);
-        }
-        String htmlContent = new String(inputStream.readAllBytes());
-        return htmlContent.replace("{{heading}}", heading);
     }
 }
