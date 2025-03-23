@@ -54,8 +54,18 @@ public class ConnectionHandler extends Thread {
     }
 
     private String handleRequest(HttpRequest request) {
-        return generateResponseHeader("text/html", "UTF-8") + generateResponseContent();
+        switch(request.getMethod()) {
+            case GET:
+                return handleGetRequest(request);
+            default:
+                return generateResponseHeader("text/html", "UTF-8") + generateResponseContent("Method not supported");
+        }
     }
+
+    private String handleGetRequest(HttpRequest request) {
+        return generateResponseHeader("text/html", "UTF-8") + generateResponseContent("Hello java world!");
+    }
+        
 
     private String generateResponseHeader(String mimeType, String charset) {
         String header = "HTTP/1.1 200 OK" + CRLF 
@@ -66,12 +76,12 @@ public class ConnectionHandler extends Thread {
         return header;
     }
 
-    private String generateResponseContent() {
-        String httpResponseContent = "<!DOCTYPE html>"
-                + "<html lang=\"en\">"
-                + "<head><title>Simple HTTP Server</title></head>"
-                + "<body><h1>Hello, World!</h1></body>"
-                + "</html>"
+    private String generateResponseContent(String content) {
+        String httpResponseContent = "<!DOCTYPE html>\n"
+                + "<html lang=\"en\">\n"
+                + "<head><title>Simple HTTP Server</title></head>\n"
+                + "<body><h1>+"+ content +"+</h1></body>\n"
+                + "</html>\n"
                 + CRLF;
 
         return httpResponseContent;
