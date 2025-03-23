@@ -22,6 +22,7 @@ public class HttpRequest extends HttpMessage{
     }
 
     public void setMethod(String method) {
+        this.method = HttpMethod.UNKOWN;
         if (method.equals(HttpMethod.GET.toString())) {
             this.method = HttpMethod.GET;
         }

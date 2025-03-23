@@ -9,11 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 public class HttpParser {
-    private final static Logger LOGGER = LoggerFactory.getLogger(HttpParser.class);
 
     public HttpRequest parseHttpRequest(InputStream inputStream) throws IOException, HttpParsingException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
@@ -34,8 +30,6 @@ public class HttpParser {
         if (requestParts.length != 3) {
             throw new HttpParsingException("Request line must have 3 parts");
         }
-
-        LOGGER.info("Request line: {}", requestLine);
         request.setMethod(requestParts[0]);
 
         String uri = requestParts[1];

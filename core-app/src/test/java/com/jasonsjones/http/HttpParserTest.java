@@ -55,14 +55,14 @@ public class HttpParserTest {
     }
 
     @Test
-    void parseHttpRequestNullMethodFromNonGetMethods() throws IOException, HttpParsingException {
+    void parseHttpRequestUnknownMethodFromNonGetMethods() throws IOException, HttpParsingException {
         String requestString = "POST / HTTP/1.1" + CRLF;
         InputStream inputStream = new ByteArrayInputStream(requestString.getBytes(StandardCharsets.US_ASCII));
 
         HttpRequest httpRequest = httpParser.parseHttpRequest(inputStream);
 
         assertNotNull(httpRequest);
-        assertNull(httpRequest.getMethod());
+        assertEquals(HttpMethod.UNKOWN, httpRequest.getMethod());
     }
 
     @Test

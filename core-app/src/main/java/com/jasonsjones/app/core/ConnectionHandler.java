@@ -11,11 +11,13 @@ import org.slf4j.LoggerFactory;
 import com.jasonsjones.http.HttpParser;
 import com.jasonsjones.http.HttpParsingException;
 import com.jasonsjones.http.HttpRequest;
+import com.jasonsjones.http.HttpResponse;
+import com.jasonsjones.http.HttpStatusCode;
+import com.jasonsjones.http.HttpVersion;
 
 public class ConnectionHandler extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
-    private static final String CRLF = "\r\n";
     private Socket socket;
     private HttpParser httpParser = new HttpParser();
     
@@ -33,10 +35,9 @@ public class ConnectionHandler extends Thread {
             OutputStream outputStream = socket.getOutputStream()) {
 
             HttpRequest request = httpParser.parseHttpRequest(inputStream);
-            String httpResponse = handleRequest(request);
+            HttpResponse httpResponse = handleRequest(request);
             
-            LOGGER.info("Sending response:\n" + httpResponse);
-            outputStream.write(httpResponse.getBytes());
+            outputStream.write(httpResponse.getResponseBytes());
             outputStream.flush();
 
         } catch (IOException | HttpParsingException e) {
@@ -53,36 +54,41 @@ public class ConnectionHandler extends Thread {
         }
     }
 
-    private String handleRequest(HttpRequest request) {
+    private HttpResponse handleRequest(HttpRequest request) {
         switch(request.getMethod()) {
             case GET:
                 return handleGetRequest(request);
             default:
-                return generateResponseHeader("text/html", "UTF-8") + generateResponseContent("Method not supported");
+                return handleNotImplemented(request);
         }
     }
 
-    private String handleGetRequest(HttpRequest request) {
-        return generateResponseHeader("text/html", "UTF-8") + generateResponseContent("Hello java world!");
-    }
-        
-
-    private String generateResponseHeader(String mimeType, String charset) {
-        String header = "HTTP/1.1 200 OK" + CRLF 
-                + "Content-Type: " + mimeType + "; charset=" + charset + CRLF
-                + "Connection: close" + CRLF
-                + CRLF;
-
-        return header;
+    private HttpResponse handleGetRequest(HttpRequest request) {
+        HttpResponse.Builder builder = new HttpResponse.Builder()
+            .withVersion(HttpVersion.HTTP_1_1)
+            .withStatusCode(HttpStatusCode.OK)
+            .withHeader("Content-Type", "text/html; charset= UTF-8")
+            .withHeader("Connection", "close")
+            .withBody(generateResponseContent("Hello java world!").getBytes());
+            return builder.build();
     }
 
-    private String generateResponseContent(String content) {
+    private HttpResponse handleNotImplemented(HttpRequest request) {
+        HttpResponse.Builder builder = new HttpResponse.Builder()
+            .withVersion(HttpVersion.HTTP_1_1)
+            .withStatusCode(HttpStatusCode.NOT_IMPLEMENTED)
+            .withHeader("Content-Type", "text/html; charset= UTF-8")
+            .withHeader("Connection", "close")
+            .withBody(generateResponseContent("Server Error: Not Implemented").getBytes());
+            return builder.build();
+    }
+
+    private String generateResponseContent(String title) {
         String httpResponseContent = "<!DOCTYPE html>\n"
                 + "<html lang=\"en\">\n"
                 + "<head><title>Simple HTTP Server</title></head>\n"
-                + "<body><h1>+"+ content +"+</h1></body>\n"
-                + "</html>\n"
-                + CRLF;
+                + "<body><h1>" + title + "</h1></body>\n"
+                + "</html>\n";
 
         return httpResponseContent;
     }
