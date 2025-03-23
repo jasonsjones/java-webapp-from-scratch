@@ -19,11 +19,17 @@ public class HttpParser {
         BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.US_ASCII));
         HttpRequest request = new HttpRequest();
 
+        parseRequestLine(reader, request);
+        parseRequestHeaders(reader, request);
+
+        return request;
+    }
+
+    private void parseRequestLine(BufferedReader reader, HttpRequest request) throws IOException, HttpParsingException {
         String requestLine = reader.readLine();
         if (requestLine == null) {
             throw new HttpParsingException("Request line is null");
         }
-
         String[] requestParts = requestLine.split(" ");
         if (requestParts.length != 3) {
             throw new HttpParsingException("Request line must have 3 parts");
@@ -40,6 +46,9 @@ public class HttpParser {
         }
         request.setVersion(requestParts[2]);
 
+    }
+
+    private void parseRequestHeaders(BufferedReader reader, HttpRequest request) throws IOException, HttpParsingException {
         String headerLine;
         Map<String, String> headers = new HashMap<>();
         while ((headerLine = reader.readLine()) != null && !headerLine.isEmpty()) {
@@ -53,8 +62,6 @@ public class HttpParser {
             }
         }
         request.setHeaders(headers);
-
-        return request;
     }
 
     private Map<String, String> parseQueryString(String queryString) throws HttpParsingException {
