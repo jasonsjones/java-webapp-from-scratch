@@ -4,9 +4,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jasonsjones.http.HttpHeader;
 import com.jasonsjones.http.HttpParser;
 import com.jasonsjones.http.HttpParsingException;
 import com.jasonsjones.http.HttpRequest;
@@ -61,51 +63,39 @@ public class ConnectionHandler extends Thread {
     }
 
     private HttpResponse handleGetRequest(HttpRequest request) {
-        try {
-            String htmlContent = loadTemplateFile("templates/response.html", "Hello Java World!");
-            HttpResponse.Builder builder = new HttpResponse.Builder()
-                .withVersion(HttpVersion.HTTP_1_1)
-                .withStatusCode(HttpStatusCode.OK)
-                .withHeader("Content-Type", "text/html; charset= UTF-8")
-                .withHeader("Connection", "close")
-                .withBody(htmlContent.getBytes());
-                return builder.build();
-        } catch (IOException e) {
-            LOGGER.error("Error loading HTML file", e);
-            return handleInternalServerError();
-        }
+        return generateResponse("templates/response.html", HttpStatusCode.OK, "Hello Java World!");
     }
 
     private HttpResponse handleNotImplemented(HttpRequest request) {
-        try {
-            String htmlContent = loadTemplateFile("templates/notImplemented.html", "Server Error: Not Implemented`");
-            HttpResponse.Builder builder = new HttpResponse.Builder()
-                .withVersion(HttpVersion.HTTP_1_1)
-                .withStatusCode(HttpStatusCode.NOT_IMPLEMENTED)
-                .withHeader("Content-Type", "text/html; charset= UTF-8")
-                .withHeader("Connection", "close")
-                .withBody(htmlContent.getBytes());
-                return builder.build();
-        } catch (IOException e) {
-            LOGGER.error("Error loading HTML file", e);
-            return handleInternalServerError();
-        }
-            
+        return generateResponse("templates/notImplemented.html", HttpStatusCode.NOT_IMPLEMENTED, "Server Error: Not Implemented");
     }
 
-    private HttpResponse handleInternalServerError() {
+    private HttpResponse generateResponse(String templateFile, HttpStatusCode statusCode, String heading) throws RuntimeException {
+        try {
+            String htmlContent = loadTemplateFile(templateFile, heading);
+            return generateResponse(statusCode, htmlContent.getBytes());
+        } catch (IOException e) {
+            LOGGER.error("Error loading HTML template file", e);
+            throw new RuntimeException("Error loading html template: " + e.getMessage(), e);
+        }
+    }
+
+    private HttpResponse generateResponse(HttpStatusCode statusCode, byte[] body) {
         HttpResponse.Builder builder = new HttpResponse.Builder()
-                .withVersion(HttpVersion.HTTP_1_1)
-                .withStatusCode(HttpStatusCode.INTERNAL_ERROR)
-                .withHeader("Content-Type", "text/html; charset= UTF-8")
-                .withHeader("Connection", "close")
-                .withBody("<h1>Internal Server Error</h1>".getBytes());
-        return builder.build();
+            .withVersion(HttpVersion.HTTP_1_1)
+            .withStatusCode(statusCode)
+            .withHeader(HttpHeader.CONTENT_TYPE.getName(), "text/html; charset= UTF-8")
+            .withHeader(HttpHeader.CONNECTION.getName(), "close")
+            .withBody(body);
+            return builder.build();
     }
 
     private String loadTemplateFile(String templateFile, String heading) throws IOException {
         ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream(templateFile);
+        if (inputStream == null) {
+            throw new IOException("Template file not found: " + templateFile);
+        }
         String htmlContent = new String(inputStream.readAllBytes());
         return htmlContent.replace("{{heading}}", heading);
     }
