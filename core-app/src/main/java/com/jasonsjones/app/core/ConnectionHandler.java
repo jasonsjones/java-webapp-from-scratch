@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +17,14 @@ import com.jasonsjones.http.HttpRequest;
 import com.jasonsjones.http.HttpResponse;
 import com.jasonsjones.http.HttpStatusCode;
 import com.jasonsjones.http.HttpVersion;
+import com.jasonsjones.loaders.TemplateLoader;
 
 public class ConnectionHandler extends Thread {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
+    private static final String HOME_TEMPLATE = "templates/home.html";
+    private static final String NOT_IMPLEMENTED_TEMPLATE = "templates/notImplemented.html";
+    
     private Socket socket;
     private HttpParser httpParser = new HttpParser();
 
@@ -63,16 +69,20 @@ public class ConnectionHandler extends Thread {
     }
 
     private HttpResponse handleGetRequest(HttpRequest request) {
-        return generateResponse("templates/response.html", HttpStatusCode.OK, "Hello Java World!");
+        Map<String, String> templateData = new HashMap<>();
+        templateData.put("heading", "Hello Java World!");
+        return generateResponse(HOME_TEMPLATE, HttpStatusCode.OK, templateData);
     }
 
     private HttpResponse handleNotImplemented(HttpRequest request) {
-        return generateResponse("templates/notImplemented.html", HttpStatusCode.NOT_IMPLEMENTED, "Server Error: Not Implemented");
+        Map<String, String> templateData = new HashMap<>();
+        templateData.put("heading", "Server Error: Not Implemented");
+        return generateResponse(NOT_IMPLEMENTED_TEMPLATE, HttpStatusCode.NOT_IMPLEMENTED, templateData);
     }
 
-    private HttpResponse generateResponse(String templateFile, HttpStatusCode statusCode, String heading) throws RuntimeException {
+    private HttpResponse generateResponse(String templateFile, HttpStatusCode statusCode, Map<String, String> templateData ) throws RuntimeException {
         try {
-            String htmlContent = TemplateLoader.loadTemplate(templateFile, heading);
+            String htmlContent = TemplateLoader.loadTemplate(templateFile, templateData);
             return generateResponse(statusCode, htmlContent.getBytes());
         } catch (IOException e) {
             LOGGER.error("Error loading HTML template file", e);
