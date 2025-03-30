@@ -2,6 +2,7 @@ package com.jasonsjones.http;
 
 public enum HttpStatusCode {
     OK(200, "OK"),
+    NOT_FOUND(404, "Not Found"),
     INTERNAL_ERROR(500, "Internal Server Error"),
     NOT_IMPLEMENTED(501, "Not Implemented");
 

@@ -17,6 +17,10 @@ public class TemplateLoader {
     }
 
     private static String interpolateData(String htmlContent, Map<String, String> templateData) {
+        if (templateData == null) {
+            return htmlContent;
+        }
+
         for (Map.Entry<String, String> entry : templateData.entrySet()) {
             String key = entry.getKey();
             String value = entry.getValue();
