@@ -25,7 +25,7 @@ public abstract class HttpMessage {
         return headers.get(name);
     }
 
-    void addHeader(String name, String value) {
+    public void addHeader(String name, String value) {
         headers.put(name, value);
     }
 

@@ -1,11 +1,21 @@
 package com.jasonsjones.http;
 
+import java.io.OutputStream;
+
 public class HttpResponse extends HttpMessage {
 
     private static final String CRLF = "\r\n";
 
     private HttpVersion version;
     private String reasonPhrase = null;
+    private OutputStream outputStream;
+    
+    public HttpResponse() {
+    }
+
+    public HttpResponse(OutputStream out) {
+        this.outputStream = out;
+    }
 
     public HttpVersion getVersion() {
         return version;
@@ -25,6 +35,11 @@ public class HttpResponse extends HttpMessage {
     public void setReasonPhrase(String reasonPhrase) {
         this.reasonPhrase = reasonPhrase;
     }
+
+    public OutputStream getOutputStream() {
+        return outputStream;
+    }
+
 
     public byte[] getResponseBytes() {
         StringBuilder resStringBuilder = new StringBuilder();
