@@ -20,6 +20,7 @@ public class RootHandler implements Handler{
         switch(request.getMethod()) {
             case GET:
                 handleGetRequest(request, response);
+                break;
             default:
                 handleNotImplemented(request, response);
         }
@@ -48,7 +49,7 @@ public class RootHandler implements Handler{
         templateData.put("heading", "Server Error: Not Implemented");
         String htmlContent = "";
         response.setVersion(HttpVersion.HTTP_1_1);;
-        response.setStatusCode(HttpStatusCode.OK);
+        response.setStatusCode(HttpStatusCode.NOT_IMPLEMENTED);
         response.addHeader(HttpHeader.CONTENT_TYPE.getName(), "text/html; charset= UTF-8");
         response.addHeader(HttpHeader.CONNECTION.getName(), "close");
         try {
