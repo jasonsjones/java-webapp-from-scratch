@@ -6,12 +6,16 @@ import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jasonsjones.http.HttpParser;
 import com.jasonsjones.http.HttpParsingException;
 import com.jasonsjones.http.HttpRequest;
 import com.jasonsjones.http.HttpResponse;
 
 public class HandlerManager {
+    private static final Logger LOGGER = LoggerFactory.getLogger(HandlerManager.class);
 
     private HttpParser httpParser = new HttpParser();
     private Map<String, Handler> handlers = new HashMap<>();
@@ -29,6 +33,7 @@ public class HandlerManager {
     } 
 
     public void registerHandler(String path, Handler handler) {
+        LOGGER.info("Registering handler for path: " + path);
         this.handlers.put(path, handler);
     }
 
@@ -46,14 +51,12 @@ public class HandlerManager {
             }
         }
 
+        LOGGER.warn("No handler found for path: " + requestPath);
         return new NotFoundHandler();
     }
 
     private void initialize() {
         // Register default handlers
         registerHandler("/", new RootHandler());
-        // registerHandler("/api/", new ApiHandler());
-        // Add more handlers as needed
     }
-
 }

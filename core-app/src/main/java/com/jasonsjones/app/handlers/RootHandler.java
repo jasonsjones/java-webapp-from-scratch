@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jasonsjones.http.HttpHeader;
 import com.jasonsjones.http.HttpRequest;
 import com.jasonsjones.http.HttpResponse;
@@ -12,6 +15,8 @@ import com.jasonsjones.http.HttpVersion;
 import com.jasonsjones.loaders.TemplateLoader;
 
 public class RootHandler implements Handler{
+    private static final Logger LOGGER = LoggerFactory.getLogger(RootHandler.class);
+
     private static final String HOME_TEMPLATE = "templates/home.html";
     private static final String NOT_IMPLEMENTED_TEMPLATE = "templates/notImplemented.html";
 
@@ -19,9 +24,11 @@ public class RootHandler implements Handler{
     public void handle(HttpRequest request, HttpResponse response) {
         switch(request.getMethod()) {
             case GET:
+                LOGGER.info("Handling GET request for path: " + request.getUri().getPath());
                 handleGetRequest(request, response);
                 break;
             default:
+                LOGGER.warn("Method not implemented for path: " + request.getUri().getPath());
                 handleNotImplemented(request, response);
         }
     }
