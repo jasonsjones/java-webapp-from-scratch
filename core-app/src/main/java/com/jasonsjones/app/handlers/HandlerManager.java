@@ -24,7 +24,7 @@ public class HandlerManager {
         initialize();
     }
 
-    public void handleClient(InputStream inputStream, OutputStream outputStream) throws IOException, HttpParsingException {
+    public void handleRawStreams(InputStream inputStream, OutputStream outputStream) throws IOException, HttpParsingException {
         HttpRequest request = httpParser.parseHttpRequest(inputStream);
         HttpResponse response = new HttpResponse(outputStream);
         String path = request.getUri().getPath();

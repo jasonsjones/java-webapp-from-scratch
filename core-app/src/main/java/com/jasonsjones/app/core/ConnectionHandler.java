@@ -28,7 +28,7 @@ public class ConnectionHandler extends Thread {
         try(InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream()) {
             HandlerManager handlerManager = new HandlerManager();
-            handlerManager.handleClient(inputStream, outputStream);
+            handlerManager.handleRawStreams(inputStream, outputStream);
         } catch (IOException | HttpParsingException e) {
             e.printStackTrace();
         } finally {
