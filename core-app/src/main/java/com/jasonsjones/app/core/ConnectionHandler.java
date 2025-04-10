@@ -24,7 +24,7 @@ public class ConnectionHandler extends Thread {
     @Override
     public void run() {
         super.run();
-        LOGGER.info("New connection from: " + this.socket.getInetAddress() + "\n");
+        LOGGER.info("New connection from: " + this.socket.getInetAddress());
         try(InputStream inputStream = socket.getInputStream();
             OutputStream outputStream = socket.getOutputStream()) {
             HandlerManager handlerManager = new HandlerManager();
