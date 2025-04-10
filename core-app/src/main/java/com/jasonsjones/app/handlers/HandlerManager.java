@@ -58,5 +58,6 @@ public class HandlerManager {
     private void initialize() {
         // Register default handlers
         registerHandler("/", new RootHandler());
+        registerHandler("/assets/*", new StaticAssetHandler());
     }
 }

@@ -1,0 +1,8 @@
+root {
+    --app-background-color: #ccc;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: var(--app-background-color);
+}
