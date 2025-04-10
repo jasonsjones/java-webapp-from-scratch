@@ -13,7 +13,7 @@ public class NotFoundHandler implements Handler {
     private static final String NOT_FOUND_TEMPLATE = "templates/notfound.html";
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    public boolean handle(HttpRequest request, HttpResponse response) {
         response.setVersion(HttpVersion.HTTP_1_1);;
         response.setStatusCode(HttpStatusCode.NOT_FOUND);
         response.addHeader(HttpHeader.CONTENT_TYPE.getName(), "text/html; charset= UTF-8");
@@ -24,8 +24,10 @@ public class NotFoundHandler implements Handler {
             response.setMessageBody(htmlContent.getBytes());
             response.getOutputStream().write(response.getResponseBytes());
             response.getOutputStream().flush();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 }

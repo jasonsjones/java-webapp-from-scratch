@@ -21,19 +21,18 @@ public class RootHandler implements Handler{
     private static final String NOT_IMPLEMENTED_TEMPLATE = "templates/notImplemented.html";
 
     @Override
-    public void handle(HttpRequest request, HttpResponse response) {
+    public boolean handle(HttpRequest request, HttpResponse response) {
         switch(request.getMethod()) {
             case GET:
                 LOGGER.info("Handling GET request for path: " + request.getUri().getPath());
-                handleGetRequest(request, response);
-                break;
+                return handleGetRequest(request, response);
             default:
                 LOGGER.warn("Method not implemented for path: " + request.getUri().getPath());
-                handleNotImplemented(request, response);
+                return handleNotImplemented(request, response);
         }
     }
 
-    private void handleGetRequest(HttpRequest request, HttpResponse response) {
+    private boolean handleGetRequest(HttpRequest request, HttpResponse response) {
         Map<String, String> templateData = new HashMap<>();
         templateData.put("heading", "Hello Java World!");
         String htmlContent = "";
@@ -46,12 +45,14 @@ public class RootHandler implements Handler{
             response.setMessageBody(htmlContent.getBytes());
             response.getOutputStream().write(response.getResponseBytes());
             response.getOutputStream().flush();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 
-    private void handleNotImplemented(HttpRequest request, HttpResponse response) {
+    private boolean handleNotImplemented(HttpRequest request, HttpResponse response) {
         Map<String, String> templateData = new HashMap<>();
         templateData.put("heading", "Server Error: Not Implemented");
         String htmlContent = "";
@@ -64,8 +65,10 @@ public class RootHandler implements Handler{
             response.setMessageBody(htmlContent.getBytes());
             response.getOutputStream().write(response.getResponseBytes());
             response.getOutputStream().flush();
+            return true;
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return false;
     }
 }
