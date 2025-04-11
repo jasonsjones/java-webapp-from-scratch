@@ -1,7 +1,6 @@
 package com.jasonsjones.app.handlers;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -14,6 +13,7 @@ import com.jasonsjones.http.HttpRequest;
 import com.jasonsjones.http.HttpResponse;
 import com.jasonsjones.http.HttpStatusCode;
 import com.jasonsjones.http.HttpVersion;
+import com.jasonsjones.loaders.StaticAssetLoader;
 
 public class StaticAssetHandler implements Handler {
     private static final Logger LOGGER = LoggerFactory.getLogger(StaticAssetHandler.class);
@@ -56,31 +56,24 @@ public class StaticAssetHandler implements Handler {
         if (requestedPath.startsWith("/" + STATIC_ASSETS_BASE_PATH)) {
             LOGGER.info("Attempting to serve static asset: {}", requestedPath);
             try {
-                ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-                InputStream resourceStream = classLoader.getResourceAsStream("templates" + requestedPath);
-                if (resourceStream != null) {
-                    byte[] fileBytes = resourceStream.readAllBytes();
-                    resourceStream.close();
-                    String contentType = determineContentType(requestedPath);
+                byte[] fileBytes = StaticAssetLoader.loadStaticAsset("templates" + requestedPath);
+                String contentType = determineContentType(requestedPath);
+                response.setVersion(HttpVersion.HTTP_1_1);
+                response.setStatusCode(HttpStatusCode.OK);
+                response.addHeader(HttpHeader.CONTENT_TYPE.getName(), contentType);
+                response.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(fileBytes.length));
+                response.addHeader(HttpHeader.CONNECTION.getName(), "close"); // Or keep-alive if supported
+                response.setMessageBody(fileBytes);
 
-                    response.setVersion(HttpVersion.HTTP_1_1);
-                    response.setStatusCode(HttpStatusCode.OK);
-                    response.addHeader(HttpHeader.CONTENT_TYPE.getName(), contentType);
-                    response.addHeader(HttpHeader.CONTENT_LENGTH.getName(), String.valueOf(fileBytes.length));
-                    response.addHeader(HttpHeader.CONNECTION.getName(), "close"); // Or keep-alive if supported
-                    response.setMessageBody(fileBytes);
-
-                    response.getOutputStream().write(response.getResponseBytes());
-                    response.getOutputStream().flush();
-                    LOGGER.info("Successfully served static asset: {}", requestedPath);
-                } else {
-                    return handleNotFound(request, response);
-                }
+                response.getOutputStream().write(response.getResponseBytes());
+                response.getOutputStream().flush();
+                LOGGER.info("Successfully served static asset: {}", requestedPath);
+                return true;
             } catch (IOException e) {
                 LOGGER.error("Error serving static asset: {}", requestedPath, e);
+                return handleNotFound(request, response);
             }
         }
-
         return false;
     }
 
