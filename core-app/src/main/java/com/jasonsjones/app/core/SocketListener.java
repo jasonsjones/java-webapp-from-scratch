@@ -20,11 +20,8 @@ public class SocketListener extends Thread {
 
     @Override
     public void run() {
-        LOGGER.info("Socket listenter running");
         try (ServerSocket serverSocket = new ServerSocket(this.port)) {
-
             LOGGER.info("Web server is running on port " + this.port);
-
             while (serverSocket.isBound() && !serverSocket.isClosed()) {
                 Socket clientSocket = serverSocket.accept();
                 ConnectionHandler connectionHandler = new ConnectionHandler(clientSocket);

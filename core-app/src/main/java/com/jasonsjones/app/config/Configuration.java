@@ -6,7 +6,7 @@ public class Configuration {
     private String webRoot;
 
     public Configuration(int port, String webRoot) {
-        this.port = port;
+        setPort(port);
         this.webRoot = webRoot;
     }
 
@@ -16,5 +16,9 @@ public class Configuration {
 
     public String getWebRoot() {
         return webRoot;
+    }
+
+    public void setPort(int port) {
+        this.port = port;
     }
 }
